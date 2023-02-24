@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <meta name="description" content="chatgpt连续对话">
+    <meta name="keywords" content="chatgpt,连续对话,java,node">
+</head>
+<body>
+<div class="editor-container"><h1 id="chatgpt-官方openai接口-如何实现连续对话-java版--附理论和node版参考源码">chatgpt 官方openai接口, 如何实现连续对话-java版,  附理论和node版参考源码</h1>
+    <h2 id="理论">理论</h2>
+    <p>调用openai的时候,  prompt 是提问的内容</p>
+    <p>实现连续对话的原理就是 prompt 开头附上一句话, 并且附上聊天上下文(需要自己维护),
+        下面为制作的一篇桌面宠物为例</p>
+    <h2 id="prompt">prompt</h2>
+    <h3 id="首先是prompt-头部的构造">首先是prompt 头部的构造</h3>
+    <pre><code class="language-java hljs">StrUtil.format(<span class="hljs-string">"\n{}说明:\n你是一只叫{}的小猫,我是你的{} 说话喜欢带喵.\n 当前 日期: ${}${}\n\n"</span>, separatorToken, chatGptLabel,userLabel, DateUtil.now(), separatorToken);
+</code></pre>
+    <p>separatorToken用来分隔每个上下文,chatGptLabel指定chatgpt的名字,,userLabel是用户的名称, 并且指定今天的日期</p>
+    <h3 id="接下来是首先是prompt内容体的构造">接下来是首先是prompt内容体的构造</h3>
+    <h4 id="内容体又分为你发的话-和chatgpt回复的话">内容体又分为你发的话, 和chatgpt回复的话</h4>
+    <p> 首先搞上两个方法,用于构造用户和chatgpt的对话,endToken标识每次结束对话的标识</p>
+    <pre><code class="language-java hljs">     <span class="hljs-comment">// 用户信息</span>
+    <span class="hljs-keyword">private</span> String <span class="hljs-title function_">buildRoleMsg</span><span class="hljs-params">(String msg)</span> {
+        <span class="hljs-keyword">return</span> userLabel + <span class="hljs-string">":\n"</span> + msg + endToken + <span class="hljs-string">"\n"</span>;
+    }
+    <span class="hljs-comment">// chatgpt信息</span>
+     <span class="hljs-keyword">private</span> String <span class="hljs-title function_">buildChatgptMsg</span><span class="hljs-params">(String msg)</span> {
+        <span class="hljs-keyword">return</span> chatGptLabel + <span class="hljs-string">":\n"</span> + msg + <span class="hljs-string">"\n"</span>;
+    }
+</code></pre>
+    <p>生成了一个用来记录每次对话的实体类</p>
+    <pre><code class="language-java hljs"><span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MessageChildHistory</span> {
+    <span class="hljs-keyword">private</span> String prompt;
+    <span class="hljs-keyword">private</span> String promptAnswer;
+}
+</code></pre>
+    <p>下面就是具体构造首先是prompt的内容体</p>
+    <pre><code class="language-java hljs">    <span class="hljs-keyword">private</span> String <span class="hljs-title function_">buildPromptBody</span><span class="hljs-params">(List&lt;MessageChildHistory&gt; messageChildHistories)</span> {
+    <span class="hljs-type">StringBuilder</span> <span class="hljs-variable">msg</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StringBuilder</span>();
+
+    <span class="hljs-keyword">for</span> (MessageChildHistory messageChildHistory : messageChildHistories) {
+        <span class="hljs-type">String</span> <span class="hljs-variable">buildRoleMsg</span> <span class="hljs-operator">=</span> buildRoleMsg(messageChildHistory.getPrompt());
+        msg.append(buildRoleMsg);
+
+        <span class="hljs-keyword">if</span> (StrUtil.isNotEmpty(messageChildHistory.getPromptAnswer())) {
+            <span class="hljs-type">String</span> <span class="hljs-variable">buildChatgptMsg</span> <span class="hljs-operator">=</span> buildChatgptMsg(messageChildHistory.getPromptAnswer());
+            msg.append(buildChatgptMsg);
+        }
+    }
+    <span class="hljs-keyword">return</span> msg.toString();
+}
+</code></pre>
+    <p>把头部和内容体加起来,就是完整的prompt的内容了,</p>
+    <p>为了方便理解下面,下面加上时间两次对话的具体参数,</p>
+    <p>第一次提问- 你吃饭了吗</p>
+    <pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+<span class="hljs-attr">"frequency_penalty"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"max_tokens"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">200</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"model"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"text-davinci-003"</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"presence_penalty"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"prompt"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"\n'&lt;|im_sep|&gt;说明:\n你是一只叫傻妞的小猫,我是你的主人 说话喜欢带喵.\n 当前 日期: $2023-02-24 12:41:41$'&lt;|im_sep|&gt;\n\n主人:\n你吃饭了吗'&lt;|im_end|&gt;\n傻妞:\n"</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"stop"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+<span class="hljs-string">"'&lt;|im_end|&gt;"</span><span class="hljs-punctuation">,</span>
+<span class="hljs-string">"'&lt;|im_sep|&gt;"</span>
+<span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"temperature"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0.7</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"top_p"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"user"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"127.0.0.1"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+    <p>第一次回答</p>
+    <pre><code class="language-json hljs">喵~吃过啦~
+</code></pre>
+    <p>第二次提问-我上个问题是什么</p>
+    <pre><code class="language-json hljs"><span class="hljs-punctuation">{</span><span class="hljs-attr">"frequency_penalty"</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"max_tokens"</span><span class="hljs-punctuation">:</span><span class="hljs-number">200</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"model"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"text-davinci-003"</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"presence_penalty"</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"prompt"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"\n'&lt;|im_sep|&gt;说明:\n你是一只叫傻妞的小猫,我是你的主人 说话喜欢带喵.\n 当前 日期: $2023-02-24 12:43:53$'&lt;|im_sep|&gt;\n\n主人:\n你吃饭了吗'&lt;|im_end|&gt;\n傻妞:\n喵~吃过啦~\n主人:\n我上个问题是什么'&lt;|im_end|&gt;\n傻妞:\n"</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"stop"</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">[</span><span class="hljs-string">"'&lt;|im_end|&gt;"</span><span class="hljs-punctuation">,</span><span class="hljs-string">"'&lt;|im_sep|&gt;"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"temperature"</span><span class="hljs-punctuation">:</span><span class="hljs-number">0.7</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"top_p"</span><span class="hljs-punctuation">:</span><span class="hljs-number">1</span><span class="hljs-punctuation">,</span><span class="hljs-attr">"user"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"127.0.0.1"</span><span class="hljs-punctuation">}</span>
+</code></pre>
+    <p>第二次回答</p>
+    <pre><code class="language-json hljs">你问我吃饭了没有
+</code></pre>
+    <p>完美, 你以后这样就结束了吗, </p>
+    <h2 id="no还有一步">no,还有一步</h2>
+    <h3 id="max_token的计算">max_token的计算</h3>
+    <p>如果看过openai文档的就会发现, 模型是有token限制的,大家最常用的一个text-davinci-003 token限制是4096</p>
+    <p>什么是token的,就是提问问题和回答长度的限制,</p>
+    <p>如果连续对话,很可能就会超出最大长度,因此需要一个动态计算长度的方法,</p>
+    <pre><code class="language-java hljs"><span class="hljs-type">GPT2Tokenizer</span> <span class="hljs-variable">gpt2Tokenizer</span> <span class="hljs-operator">=</span> GPT2Tokenizer.fromPretrained(<span class="hljs-string">"tokenizers/gpt2/"</span>);
+<span class="hljs-type">int</span> <span class="hljs-variable">token</span> <span class="hljs-operator">=</span> gpt2Tokenizer.encode(msg).size();
+</code></pre>
+    <p>这样就获取到了实际的token,GPT2Tokenizer的实现我贴到文章末尾</p>
+    <p>还有问题,4096的限制是prompt的token长度+参数max_token参数指定的长度 &lt;= 4096, 所以如果上下文长度超过了的话, 需要移除不重要的对话, 这里我是移除了 最早的一次提问,每次超出token,移除最早的一个提问</p>
+    <pre><code class="language-java hljs"><span class="hljs-type">int</span> <span class="hljs-variable">newToken</span> <span class="hljs-operator">=</span> getToken(promptPrefix + promptBodyStr + promptSuffix);
+     <span class="hljs-keyword">while</span> (newToken &gt; maxToken){
+            messageChildHistories.remove(<span class="hljs-number">0</span>);
+
+            promptBodyStr = buildPromptBody(messageChildHistories);
+
+            newToken = getToken(promptPrefix + promptBodyStr + promptSuffix);
+        }
+</code></pre>
+    <p>完结,这样就结束了</p>
+    <p>附链接:</p>
+    <p>token的计算</p>
+    <p>java- <a href="https://gitee.com/guowenzhuang/wx-time/blob/master/src/main/java/com/gwz/wxtime/core/util/GPT2Tokenizer.java">https://gitee.com/guowenzhuang/wx-time/blob/master/src/main/java/com/gwz/wxtime/core/util/GPT2Tokenizer.java</a></p>
+    <p>node- <a href="https://github.com/latitudegames/GPT-3-Encoder">https://github.com/latitudegames/GPT-3-Encoder</a></p>
+    <p>连续对话源码
+        java- <a href="https://gitee.com/guowenzhuang/wx-time/blob/master/src/main/java/com/gwz/wxtime/chessboard/service/TuLingService.java">https://gitee.com/guowenzhuang/wx-time/blob/master/src/main/java/com/gwz/wxtime/chessboard/service/TuLingService.java</a></p>
+    <p>node- <a href="https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/src/ChatGPTClient.js">https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/src/ChatGPTClient.js</a></p>
+    <p>另附上个人博客链接: <a href="https://www.time520.com/">https://www.time520.com/</a></p>
+</div>
+</body>
+</html>
