@@ -1,0 +1,104 @@
+#app .html-game {
+    background: rgb(0, 0, 0);
+    height: 80vh;
+    width: 100%;
+}
+
+#canvas-game {
+    width: 100%;
+    height: 100%;
+    background: rgb(0, 0, 0);
+
+}
+
+#game {
+    position: relative;
+}
+
+#game > #game-who {
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    background: rgb(0, 0, 0);
+    color: rgb(248, 248, 248);
+    font-size: calc(100vw / 52.5);
+    letter-spacing: 6px
+}
+
+@media screen and (max-width: 1000px) {
+    #game > #game-who {
+        font-size: 5vw;
+        left: 20vw;
+
+    }
+
+    #app #game > #game-score {
+        font-size: 5vw;
+        left: 35%;
+
+    }
+
+    #app #game > #game-score #score {
+        font-size: 5vw;
+    }
+
+    #game #game-start {
+        left: 40vw;
+    }
+
+    #app .html-game {
+        height: 40vh;
+    }
+
+    #game > #game-over {
+
+        font-size: 5vw;
+
+    }
+}
+
+#game > #game-over {
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    background: rgb(0, 0, 0);
+    color: rgb(248, 248, 248);
+    font-size: calc(100vw / 52.5);
+    letter-spacing: 6px;
+    color: red;
+}
+
+#game > #game-score {
+    position: absolute;
+    top: 35%;
+    left: 45%;
+    background: rgb(0, 0, 0);
+    color: rgb(248, 248, 248);
+    font-size: calc(100vw / 52.5);
+    letter-spacing: 6px
+}
+
+
+#game-score > #score {
+    background: rgb(0, 0, 0);
+}
+
+#game-start {
+    position: absolute;
+    top: 10%;
+    left: 45%;
+    color: rgba(0, 0, 0, 1);
+    background: rgba(248, 248, 248, 1);
+    padding: 5px;
+    border-radius: 10%;
+}
+
+#game-start:hover {
+    background: rgba(248, 248, 248, 0.8);
+    color: rgba(0, 0, 0, 0.8);
+
+}
+
+#game-start:active {
+    background: rgba(248, 248, 248, 0.5);
+}

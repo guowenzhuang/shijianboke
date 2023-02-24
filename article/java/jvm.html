@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+  <meta name="description" content="深入浅出JVM">
+  <meta name="keywords" content="JVM内存模型,JMM与内存可见性,类的加载与卸载,jvm">
+</head>
+<body>
+<hr />
+<h1>深入浅出JVM</h1>
+
+<h2>📝目录</h2>
+
+<ul>
+  <li><a href="#jvmMemory">JVM内存模型</a></li>
+  <li><a href="#jvmMemoryShow">JMM与内存可见性</a></li>
+  <li><a href="#jvmClassLoad">类的加载与卸载</a></li>
+</ul>
+
+<h2>JVM内存模型 <a name = 'jvmMemory'> </a></h2>
+
+<h3>1. 线程独占</h3>
+
+<h4>栈(Stack)</h4>
+
+<p>又称方法栈,线程私有的,线程执行方法是都会创建一个栈帧,用来存储局部变量表,操作栈,动态链接,方法出口等信息.调用方法时执行入栈,方法返回式执行出栈.</p>
+
+<h4>本地方法栈(Native Method Stack)</h4>
+
+<p>与栈类似,也是用来保存执行方法的信息.执行Java方法是使用栈,执行Native方法时使用本地方法栈.</p>
+
+<h4>程序计数栈(Program Counter Register)</h4>
+
+<p>保存着当前线程执行的字节码位置,每个线程工作时都有独立的计数器,只为执行Java方法服务,执行Native方法时,程序计数器为空.</p>
+
+<h3>2. 线程共享</h3>
+
+<h4>堆(Heap)</h4>
+
+<p>JVM内存管理最大的一块,对被线程共享,目的是存放对象的实例,几乎所欲的对象实例都会放在这里,当堆没有可用空间时,会抛出OOM异常.根据对象的存活周期不同,JVM把对象进行分代管理,由垃圾回收器进行垃圾的回收管理</p>
+
+<h4>方法区(Method Area)</h4>
+
+<p>又称非堆区,用于存储已被虚拟机加载的类信息,常量,静态变量,即时编译器优化后的代码等数据.1.7的永久代和1.8的元空间都是方法区的一种实现</p>
+
+<h2>JMM与内存可见性 <a name = 'jvmMemoryShow'></a></h2>
+
+<p>JMM是定义程序中变量的访问规则,线程对于变量的操作只能在自己的工作内存中进行,而不能直接对主内存操作.由于指令重排序,读写的顺序会被打乱,因此JMM需要提供原子性,可见性,有序性保证.</p>
+
+<p><img src="https://i.loli.net/2019/08/11/2wlEI1gFqKVvUzM.png" alt="2wlEI1gFqKVvUzM" title="" /></p>
+
+<h3>JMM是如何保证原子性,可见性,有序性</h3>
+
+<p><img src="https://i.loli.net/2019/08/11/5vdjahYyTEircHO.png" alt="5vdjahYyTEircHO" title="" /></p>
+
+<h4>原子性</h4>
+
+<ol>
+  <li><p>除了long,double的基本数据类型读写是原子性的</p></li>
+  <li><p>synchronized保证原子性 通过java的两个高级的字节码指令monitorenter和monitorexit保证的</p></li>
+</ol>
+
+<h4>可见性</h4>
+
+<ol>
+  <li><p>通过synchronized</p>
+
+    <p>　1）线程解锁前，必须把共享变量的最新值刷新到主内存中</p>
+
+    <p>　2）线程加锁时，将清空工作内存中共享变量的值，从而使用共享变量时需要从主内存中重新获取最新的值</p></li>
+  <li><p>volatile 强制变量赋值会刷新回主内存,强制变量的读取会从主内存中加载</p></li>
+</ol>
+
+<h3>有序性</h3>
+
+<ol>
+  <li><p>volatil 阻止指令的重排序 可以保证变量读写的有序性</p></li>
+  <li><p>happens-before原则 相关链接: <a href="https://blog.csdn.net/rap_libai/article/details/82531229">https://blog.csdn.net/rap_libai/article/details/82531229</a></p></li>
+</ol>
+
+<h2>类的加载与卸载 <a name = 'jvmClassLoad'></a></h2>
+
+<p><img src="https://i.loli.net/2019/08/11/Brg4wjhOqi9176m.png" alt="Brg4wjhOqi9176m" title="" /></p>
+
+<ol>
+  <li><p>加载: 通过类的完全限定名,查找此类字节码文件,利用字节码文件创建Class对象</p></li>
+  <li><p>验证: 确保Class文件符合当前虚拟机的要求,不会危害到虚拟机自身安全</p></li>
+  <li><p>准备: 进行内存分配,为static修饰的类变量分配内存,并设置初始值(<strong>0</strong>或*<em>null</em>*)</p>
+
+    <p>不包含final修饰的静态变量,因为final变量在编译时分配</p></li>
+  <li><p>解析: 将常量池中的符号引用替换为直接引用的过程.直接引用为直接指向目标的指针或者相对偏移量等.</p></li>
+  <li><p>初始化: 主要完成静态块执行以及静态变量的赋值.先初始化父类,再初始化当前类.只有对类主动使用时才会初始化</p></li>
+</ol>
+
+<p>Java自带的加载器加载的类,在虚拟机的生命周期中是不会被卸载的,只有用户自定义的加载器加载的类才可以被卸.</p>
+
+<h3>双亲委派模式</h3>
+
+<p><img src="https://i.loli.net/2019/08/11/J8KI5EHnbcwheR3.png" alt="J8KI5EHnbcwheR3" title="" /></p>
+
+<p>双亲委派模式,即加载器加载类时先把请求委托给自己的父类加载器执行,直到顶层的启动类加载器.父类加载器能够完成加载则成功返回,不能则子类加载器才自己尝试加载.</p>
+
+<p>优点</p>
+
+<ol>
+  <li>避免类的重复加载</li>
+  <li>避免Java的核心API被篡改</li>
+</ol>
+
+<h3>分代回收</h3>
+
+<p><img src="https://i.loli.net/2019/08/11/XyniZIfaBkqd3cz.png" alt="XyniZIfaBkqd3cz" title="" /></p>
+
+<p>分代回收基于两个事实:大部分对象很快就不使用了,还有一部分不会立即无用,但也不会持续很长时间.</p>
+
+<ol>
+  <li><p>年轻代存放新创建的对象,分为Eden区和两个Survivor区,大部分对象在Eden区生成,当Eden区满时,还存活的对象会在Survivo区交替保存,达到一定次数后会升到老年代</p></li>
+  <li><p>老年代用来存放从年轻代晋升而来的存活的较长的对象</p></li>
+  <li><p>永久代保存类信息等内容</p></li>
+</ol>
+
+<h3>回收算法</h3>
+
+<h4>CMS算法</h4>
+
+<p>1.7前主流垃圾回收算法,为标记-清楚算法,优点是并发收集,停顿小.</p>
+
+<p><img src="https://i.loli.net/2019/08/11/sRTp2DYQBdMVHKx.jpg" alt="sRTp2DYQBdMVHKx" title="" /></p>
+
+<ol>
+  <li><p>初始标记会StopTheWorld,标记的对象是root即最直接可达的对象</p></li>
+  <li><p>并发标记GC线程和应用线程并发执行,标记可达的对象</p></li>
+  <li><p>重新标记第二个StopTheWorld,停顿时间比并发标记小很多,但比初始标记稍长.主要对对象重新扫描并标记</p></li>
+  <li><p>并发清理进行并发的垃圾清理</p></li>
+  <li><p>并发重置为下一次GC重置相关数据结构</p></li>
+</ol>
+
+<h4>G1算法</h4>
+
+<p>1.9后默认的垃圾回收算法,特点保持高回收率的同时减少停顿.采用每次只清理一部分,而不是清理全部的增量式清理,以保证停顿时间不会过长</p>
+
+<p><img src="https://i.loli.net/2019/08/11/jR8sKmbfyEhFZML.jpg" alt="jR8sKmbfyEhFZML" title="" /></p>
+
+<p>其取消了年轻代与老年代的物理划分,但仍属于分代收集器,算法将堆分为若干个逻辑区域(region),一部分用作年轻代,一部分用作老年代,还有用来存储巨型对象的分区. <br>
+  同CMS相同,会遍历所有对象,标记引用情况,清除对象后会对区域进行复制移动,以整合碎片空间.</p>
+
+<ul>
+  <li>年轻代回收:</li>
+</ul>
+
+<p>并行复制采用复制算法,并行收集,会StopTheWorld.</p>
+
+<ul>
+  <li><p>老年代回收(会对年轻代一并回收): </p>
+
+    <ol><li><p>初始标记完成堆root对象的标记,会StopTheWorld.</p></li>
+      <li><p>并发标记GC线程和应用线程并发执行.</p></li>
+      <li><p>最终标记完成三色标记周期,会StopTheWorld</p></li>
+      <li><p>复制/清楚会优先对可回收空间加大的区域进行回收</p></li></ol></li>
+</ul>
+
+<h4>ZGC</h4>
+
+<p>1.11中提供的高效垃圾回收算法,针对大堆内存设计,可以处理TB级别的堆,可以做到10ms以下的回收停顿时间.</p>
+
+<p><img src="https://i.loli.net/2019/08/11/m4x5Lbr6HAEKjMd.jpg" alt="m4x5Lbr6HAEKjMd" title="" /></p>
+
+<ul>
+  <li><p>着色指针</p></li>
+  <li><p>读屏障</p></li>
+  <li><p>并发处理</p></li>
+  <li><p>基于region</p></li>
+  <li><p>内存压缩(整理)</p>
+
+    <ol><li><p>roots标记标记root对象,会StopTheWorld</p></li>
+      <li><p>并发标记利用读屏障与应用线程一起运行标记,可能会发生StopTheWorld.</p></li>
+      <li><p>清除会清理标记为不可用的对象</p></li>
+      <li><p>roots重定位是对存活的对象进行移动,以腾出大块内存空间,减少碎片产生.重定位最开始会StopTheWorld,却决于重定位集与对象总活动集的比例</p></li>
+      <li><p>并发重定位与并发标记类似</p></li>
+      <li><h1> </h1></li></ol></li>
+</ul>
+<div>
+  <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

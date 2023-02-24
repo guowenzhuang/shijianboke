@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <meta name="description" content="jdk8新特性">
+    <meta name="keywords" content="java8,jdk8,新特性">
+</head>
+<body>
+<hr/>
+
+<h1>jdk8 新特性</h1>
+
+<h2>📝 目录</h2>
+
+<ul>
+    <li><a href="#about">引言</a></li>
+    <li><a href="#lambda">lambda表达式(重磅)</a></li>
+    <li><a href="#function">函数式接口</a></li>
+    <li><a href="#stream">stream</a></li>
+    <li><a href="#Date-Time">Date-Time</a></li>
+</ul>
+
+<h2>🧐 引言 <a name='about'></a></h2>
+
+<p>最近在公司接触的项目都是基于jdk8的
+    所以再温习下jdk8的一些常用特性</p>
+
+<h2>🚗 lambda表达式(重磅) <a name='lambda'></a></h2>
+
+<h3>Lambda表达式是什么?</h3>
+
+<p>Lambda是一个 <b> 匿名函数</b>，我们可以把Lambda表达式理解为一段可以传递的代码（将代码像数据一样传递）。可以写出更简洁、更灵活的代码。作为一种更紧凑的代码风格，使Java的语言表达能力得到了提升。</p>
+
+<h3>Lambda表达式的基础语法</h3>
+
+<p>Java8中引入了一个新的操作符“->”，该操作符称为箭头操作符或者Lambda操作符，该操作符将Lambda表达式拆分成两个部分：</p>
+
+<p>左侧：Lambda表达式的参数列表。
+    右侧：Lambda表达式中需要执行的功能，即Lambda体。</p>
+
+<p>语法格式一：无参数，无返回值</p>
+
+<p><code>java
+    () -&gt; System.out.println("hello Lambda");
+</code></p>
+
+<p>语法格式二：有一个参数，并且无返回值</p>
+
+<p><code>java
+    (x) -&gt; System.out.println(x);
+</code></p>
+
+<p>语法格式三：若只有一个参数，小括号可以省略不写</p>
+
+<p><code>java
+    x -&gt; System.out.println(x);
+</code></p>
+
+<p>语法格式四：有两个以上的参数，有返回值，并且Lambda体中有多条语句</p>
+
+<p><code>java
+    Comparator&lt;Integer&gt; com = (x,y) -&gt; {
+    System.out.println("函数式接口");
+    return Integer.compare(x,y);
+    };
+</code></p>
+
+<p>语法格式五：若Lambda体中只有一条语句，return和大括号都可以省略不写</p>
+
+<p><code>java
+    Comparator&lt;Integer&gt; com = (x,y) -&gt; Integer.compare(x,y);
+</code></p>
+
+<p>语法格式六：Lambda表达式的参数列表的数据类型可以省略不写，因为JVM编译器通过上下文推断出数据类型</p>
+
+<p><code>java
+    (Integer x,Integer y) -&gt; x+y;
+</code></p>
+
+<h2>👷‍♂️ 函数式接口,与Lambda表达式联合使用 <a name='function'></a></h2>
+
+<h3>Java8内置四大核心函数式接口</h3>
+
+<p><img src="https://www.showdoc.cc/server/api/common/visitfile/sign/8b91542fb3ceb0fa7e8819d30f8b9b54?showdoc=.jpg"
+        alt="Java8内置四大核心函数式接口" title=""/></p>
+
+<h4>Consumer：消费型接口</h4>
+
+<p>```java
+    /*
+    * 消费式接口：传一个参数，没有返回值
+    * Consumer
+    <T> void accept(T t);
+        */
+        @Test
+        public void test1() {
+        say("好好学习，天天向上！",
+        x -> System.out.println(x+new Date()));
+        }
+</p>
+
+<pre><code>public void say(String str, Consumer&lt;String&gt; c) {
+    c.accept(str);
+}
+</code></pre>
+
+<p>```</p>
+
+<h4>Supplier：供给型接口</h4>
+
+<p>```java
+    /*
+    * 供给式接口：没有参数，返回一个结果
+    * Supplier
+    <T> T get();
+        */
+        @Test
+        public void test2() {
+        List
+        <Integer> listResult = getNumberArr(() -> {
+            List
+            <Integer> list = new ArrayList&lt;>();
+                for(int i=0; i&lt;10; i++) {
+                list.add(new Random().nextInt());
+                }
+                return list;
+                });
+</p>
+
+<pre><code>    for (Integer integer : listResult) {
+        System.out.println("DATA:"+integer);
+    }
+}
+
+public List&lt;Integer&gt; getNumberArr(Supplier&lt;List&lt;Integer&gt;&gt; s){
+    return s.get();
+}
+</code></pre>
+
+<p>```</p>
+
+<h4>Function
+    <T
+    , R>：函数型接口
+</h4>
+
+<p>```java
+    /*
+    * 函数式接口：传入一个参数，返回一个结果
+    * Function
+    <T
+    ,R> R apply(T t);
+    */
+    @Test
+    public void test3() {
+    System.out.println(apply("GWZ:", (x) -> x+new Date()));
+    }
+</p>
+
+<pre><code>public String apply(String a, Function&lt;String, String&gt; f) {
+    return f.apply(a);
+};
+</code></pre>
+
+<p>```</p>
+
+<h4>Predicate：断言型接口</h4>
+
+<p>```java
+    /*
+    * 断言型接口：传入一个参数，返回一个布尔值
+    * Predicate
+    <T> boolean test(T t);
+        */
+        @Test
+        public void test4() {
+        System.out.println(test(40, x -> x>0));
+        }
+</p>
+
+<pre><code>public String test(int x, Predicate&lt;Integer&gt; p) {
+    if(p.test(x)) {
+        return "大于0";
+    }else {
+        return "小于0";
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<h3>其它子接口如下图</h3>
+
+<p><img src="https://www.showdoc.cc/server/api/common/visitfile/sign/db4327450dd8fb1093885df8b4ed6be9?showdoc=.jpg"
+        alt="" title=""/></p>
+
+<h2>👦 Stream API <a name='stream'></a></h2>
+
+<h3>什么是Stream?</h3>
+
+<p>流（Stream）到底是什么？</p>
+
+<p>流，是数据渠道，用于操作数据源（集合、数组等）所生成的元素序列。<b>集合讲的是数据，而流讲的是计算!</b></p>
+
+<p>注意:</p>
+
+<ol>
+    <li>Stream自己不会存储元素。</li>
+    <li>Stream不会改变源对象，相反他们会返回一个持有结果的新Stream。</li>
+    <li>Stream是延迟执行的，这意味着它们会等到需要结果的时候才会执行。</li>
+</ol>
+
+<h3>Stream的操作三个步骤</h3>
+
+<p><img src="https://www.showdoc.cc/server/api/common/visitfile/sign/0be73b6c0a4c30b332cd7c1da1b913d1?showdoc=.jpg"
+        alt="" title=""/></p>
+
+<p>```java
+    /*
+    * 创建Stream的几种方式
+    */
+    public class TestStreamAPI1 {</p>
+
+<pre><code>@Test
+public void test1() {
+    //1.可以通过Collection系列集合提供的stream()或parallelStream()
+    List&lt;String&gt; list = new ArrayList&lt;&gt;();
+    Stream&lt;String&gt; stream = list.stream();
+
+    //2.通过Arrays中的静态方法stream()获取数组流
+    Employee[] employees = new Employee[10];
+    Stream&lt;Employee&gt; stream2 = Arrays.stream(employees);
+
+    //3.通过Stream类中的静态方法of()
+    Stream&lt;String&gt; stream3 = Stream.of("AA","BB","CC","DD");
+
+    //4.通过迭代的方式创建无限流
+    Stream&lt;Integer&gt; stream4 = Stream.iterate(0, x -&gt; x+2);
+    stream4.limit(5).forEach(System.out::println);
+
+    //5.通过生成的方式创建无限流
+    Stream&lt;Double&gt; stream5 = Stream.generate(() -&gt; Math.random());
+}
+</code></pre>
+
+<p>}
+    ```</p>
+
+<h3>stream常用的几个方法</h3>
+
+<h4>forEach</h4>
+
+<p>Stream 提供了新的方法 'forEach' 来迭代流中的每个数据。以下代码片段使用 forEach 输出了10个随机数：</p>
+
+<p><code>java
+    Random random = new Random();
+    random.ints().limit(10).forEach(System.out::println);
+</code></p>
+
+<h4>map</h4>
+
+<p>map 方法用于映射每个元素到对应的结果，以下代码片段使用 map 输出了元素对应的平方数：</p>
+
+<p><code>java
+    List&lt;Integer&gt; numbers = Arrays.asList(3, 2, 2, 3, 7, 3, 5);
+    // 获取对应的平方数
+    List&lt;Integer&gt; squaresList = numbers.stream().map( i -&gt; i*i).distinct().collect(Collectors.toList());
+</code></p>
+
+<h4>filter</h4>
+
+<p>filter 方法用于通过设置的条件过滤出元素。以下代码片段使用 filter 方法过滤出空字符串：</p>
+
+<p><code>java
+    List&lt;String&gt;strings = Arrays.asList("abc", "", "bc", "efg", "abcd","", "jkl");
+    // 获取空字符串的数量
+    int count = strings.stream().filter(string -&gt; string.isEmpty()).count();
+</code></p>
+
+<h4>limit</h4>
+
+<p>limit 方法用于获取指定数量的流。 以下代码片段使用 limit 方法打印出 10 条数据：</p>
+
+<p><code>java
+    Random random = new Random();
+    random.ints().limit(10).forEach(System.out::println);
+</code></p>
+
+<h4>sorted</h4>
+
+<p>sorted 方法用于对流进行排序。以下代码片段使用 sorted 方法对输出的 10 个随机数进行排序：</p>
+
+<p><code>java
+    Random random = new Random();
+    random.ints().limit(10).sorted().forEach(System.out::println);
+</code></p>
+
+<h4>并行（parallel）程序</h4>
+
+<p>parallelStream 是流并行处理程序的代替方法。以下实例我们使用 parallelStream 来输出空字符串的数量：</p>
+
+<p><code>java
+    List&lt;String&gt; strings = Arrays.asList("abc", "", "bc", "efg", "abcd","", "jkl");
+    // 获取空字符串的数量
+    int count = strings.parallelStream().filter(string -&gt; string.isEmpty()).count();
+</code></p>
+
+<h4>Collectors</h4>
+
+<p>Collectors 类实现了很多归约操作，例如将流转换成集合和聚合元素。Collectors 可用于返回列表或字符串：</p>
+
+<p>```java
+    List
+    <String>strings = Arrays.asList("abc", "", "bc", "efg", "abcd","", "jkl");
+        List
+        <String> filtered = strings.stream().filter(string -> !string.isEmpty()).collect(Collectors.toList());
+</p>
+
+<p>System.out.println("筛选列表: " + filtered);
+    String mergedString = strings.stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(", "));
+    System.out.println("合并字符串: " + mergedString);
+    ```</p>
+
+<h4>统计</h4>
+
+<p>另外，一些产生统计结果的收集器也非常有用。它们主要用于int、double、long等基本类型上，它们可以用来产生类似如下的统计结果。</p>
+
+<p><code>java
+    List&lt;Integer&gt; numbers = Arrays.asList(3, 2, 2, 3, 7, 3, 5);
+    IntSummaryStatistics stats = numbers.stream().mapToInt((x) -&gt; x).summaryStatistics();
+    System.out.println("列表中最大的数 : " + stats.getMax());
+    System.out.println("列表中最小的数 : " + stats.getMin());
+    System.out.println("所有数之和 : " + stats.getSum());
+    System.out.println("平均数 : " + stats.getAverage());
+</code></p>
+
+<h2>⏰ 新的日期API <a name='Date-Time'></a></h2>
+
+<p>Java 8通过发布新的Date-Time API (JSR 310)来进一步加强对日期与时间的处理。</p>
+
+<ul>
+    <li><p>Local(本地) − 简化了日期时间的处理，没有时区的问题。</p></li>
+    <li><p>Zoned(时区) − 通过制定的时区处理日期时间。</p></li>
+</ul>
+
+<blockquote>
+    <p>(这里只介绍一下Local,Zoned可以百度自己了解下)</p>
+</blockquote>
+
+<p>```java
+    import java.time.LocalDate;
+    import java.time.LocalTime;
+    import java.time.LocalDateTime;
+    import java.time.Month;</p>
+
+<p>public class Java8Tester {
+    public static void main(String args[]){
+    Java8Tester java8tester = new Java8Tester();
+    java8tester.testLocalDateTime();
+    }</p>
+
+<p>public void testLocalDateTime(){
+    // 获取当前的日期时间
+    LocalDateTime currentTime = LocalDateTime.now();
+    System.out.println("当前时间: " + currentTime);</p>
+
+<pre><code>  LocalDate date1 = currentTime.toLocalDate();
+  System.out.println("date1: " + date1);
+
+  Month month = currentTime.getMonth();
+  int day = currentTime.getDayOfMonth();
+  int seconds = currentTime.getSecond();
+
+  System.out.println("月: " + month +", 日: " + day +", 秒: " + seconds);
+
+  LocalDateTime date2 = currentTime.withDayOfMonth(10).withYear(2012);
+  System.out.println("date2: " + date2);
+
+  // 12 december 2014
+  LocalDate date3 = LocalDate.of(2014, Month.DECEMBER, 12);
+  System.out.println("date3: " + date3);
+
+  // 22 小时 15 分钟
+  LocalTime date4 = LocalTime.of(22, 15);
+  System.out.println("date4: " + date4);
+
+  // 解析字符串
+  LocalTime date5 = LocalTime.parse("20:15:30");
+  System.out.println("date5: " + date5);
+</code></pre>
+
+<p>}
+    }
+    ```</p>
+
+<p>输出结果为：</p>
+
+<p><code>java
+    当前时间: 2019-07-18T17:32:24.277
+    date1: 2019-07-18
+    月: JULY, 日: 18, 秒: 24
+    date2: 2012-07-10T17:32:24.277
+    date3: 2014-12-12
+    date4: 22:15
+    date5: 20:15:30
+</code>
+    借鉴:
+    - <a href="https://www.runoob.com/java/java8-datetime-api.html">菜鸟教程</a>
+    - <a href="https://juejin.im/post/5b3ceef45188251b3c3b0440">ZGYSYY的java8新特性学习笔记</a></p>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

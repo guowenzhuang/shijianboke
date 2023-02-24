@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="并发与多线程">
+    <meta name="keywords" content="java,并发,多线程">
+    <title>逍遥时间的网站</title>
+</head>
+<body>
+<hr />
+
+<h1>并发与多线程</h1>
+
+<h2>知识点汇总</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/njBmTyuDKSgHIpP.png" alt="njBmTyuDKSgHIpP" title="" /></p>
+
+<h2>线程的状态转换</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/CPNhJdwUn5zY2Vf.png" alt="CPNhJdwUn5zY2Vf" title="" /></p>
+
+<p>六个状态对应ThreadState的枚举</p>
+
+<ol>
+    <li><p>创建一个线程时线程处在new状态</p></li>
+    <li><p>运行Thread.start方法后 线程进入Running状态 </p>
+
+        <p>所有可运行的线程不能马上运行而是要先进入就绪状态等待线程调度就是READY状态,在获取到CPU后才能进入运行状态Running,运行状态随条件可以变为除Running之外的其他状态</p></li>
+    <li><p>进入synchronized同步块或者同步方法时,获取锁失败会进入到blocked状态</p>
+
+        <p>当获取锁时,会从blocked状态回到就绪状态</p></li>
+    <li><p>运行中的线程还会进入到等待状态 两个等待状态</p>
+
+        <ol><li><p>一个是有超时时间的等待,例如,上图右上角,wait方法...</p></li>
+            <li><p>另外一个是无超时 的等待,例如上图右下的wait方法...</p></li></ol>
+
+        <p>这两个等待状态都可以通过上图右中的notify方法... 结束运行状态</p></li>
+    <li><p>线程运行完成结束时线程状态会变成TERMINATED状态</p></li>
+</ol>
+
+<h2>线程的同步与互斥</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/ejI7nzrAm5OUTPL.png" alt="ejI7nzrAm5OUTPL" title="" /></p>
+
+<p>CAS是一种乐观锁的实现,是一种轻量级锁</p>
+
+<p>CAS容易出现ABA问题,比如线程T1在读取完值A后发生两次写入,先有线程T2写回了B,又有线程T3写回了A,此时T1在写回时进行比较发现值还是A无法进行判断,</p>
+
+<p>解决: 增加额外的标志位或时间戳</p>
+
+<h2>Synchronized实现原理</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/RprF8SatQ4z5UmG.png" alt="RprF8SatQ4z5UmG" title="" /></p>
+
+<p>锁优化都失败后会将锁由轻量级升级为重量级</p>
+
+<h2>AQS与Lock</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/8K4r29b6L7iQY5A.png" alt="8K4r29b6L7iQY5A" title="" /></p>
+
+<p>AQS队列同步器 </p>
+
+<p>相关链接: <a href="https://www.cnblogs.com/fsmly/p/10701109.html%5D">[https://www.cnblogs.com/fsmly/p/10701109.html]</a>(<a href="https://www.cnblogs.com/fsmly/p/10701109.html">https://www.cnblogs.com/fsmly/p/10701109.html</a></p>
+
+<h2>线程池适用场景</h2>
+
+<ol>
+    <li><p>Executors.NewFixedThreadPool固定线程数,无界队列.适用于任务数量不均匀的场景,对内存压力不敏感,但系统负载敏感的场景.</p></li>
+    <li><p>Executors.newCachedThreadPool无限线程数,适用于要求低延迟的短期任务场景.</p></li>
+    <li><p>Executors.newSingleThreadPool单个线程的固定线程池,适用于保证异步执行顺序的场景.</p></li>
+    <li><p>Executors.newScheduledThreadPool适用于定期执行任务场景,支持固定频率和固定延迟.</p></li>
+    <li><p>Executors.newWorkStealingPool使用ForkJoinPool,多任务队列的固定并行度,适合任务执行时长不均匀的场景.</p></li>
+</ol>
+
+<h2>线程池参数介绍</h2>
+
+<p><code>java
+    ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepaAliveTime,TimeUnit timeUnit,BlockQueue&lt;Runnable&gt; workQueue,ThreadFactory threadFactory,RejectedExceptionHandler rejectedHandler) //ThreadPoolExecutor构造方法
+</code></p>
+
+<ol>
+    <li><p>corePoolSize核心线程数,也可理解为最小线程数</p></li>
+    <li><p>maximumPoolSize最大线程数</p></li>
+    <li><p>keepaAliveTime非核心线程非活跃存活时间长度</p></li>
+    <li><p>timeUnit存活时间单位,枚举等</p></li>
+    <li><p>workQueue阻塞队列,如</p>
+
+        <p>ArrayBlockingQueue,LinkedBlockingQueue,SynchronousQueue等</p></li>
+    <li><p>threadFactory可定制线程,一般使用默认即可</p></li>
+    <li><p>rejectedHandler线程池满时拒绝策略,如 Abort,Discard,CallerRuns,DiscardOldest</p></li>
+</ol>
+
+<h2>线程池任务执行流程</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/BQED1o6Y3m7GnxH.png" alt="BQED1o6Y3m7GnxH" title="" /></p>
+
+<h2>JUC常用工具类</h2>
+
+<p><img src="https://i.loli.net/2019/08/18/4zaE5Hy7dmfMKD2.png" alt="4zaE5Hy7dmfMKD2" title="" /></p>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

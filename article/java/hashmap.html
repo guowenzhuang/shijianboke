@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <meta name="description" content="HashMap源码分析">
+    <meta name="keywords" content="java,hashmap,java,源码,解析">
+</head>
+<body>
+<hr/>
+<h1>HashMap源码分析</h1>
+
+<blockquote>
+    <p>基于jdk8</p>
+</blockquote>
+
+<p>先来一张HashMap的结构图</p>
+
+<p><img src="https://i.loli.net/2019/05/23/5ce6596cc80eb59304.png" alt="HashMap结构图" title=""/></p>
+
+<ul>
+    <li><p>Map是"key-value键值对"接口</p></li>
+    <li><p>AbstractMap实现了"键值对"的通用函数接口</p></li>
+</ul>
+
+<h2>HashMap的基本参数</h2>
+
+<p>```java
+    /**
+    * 初始化容量16
+    */
+    static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16</p>
+
+<pre><code>/**
+ * 容量最大值
+ */
+static final int MAXIMUM_CAPACITY = 1 &lt;&lt; 30;
+
+/**
+ * 加载因子到75%的时候扩充
+ */
+static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+/**
+ * 链表长度大于8的时候转换成红黑树
+ */
+static final int TREEIFY_THRESHOLD = 8;
+
+/**
+ * 链表长度小于6的时候重新转换成链表
+ */
+static final int UNTREEIFY_THRESHOLD = 6;
+
+/**
+ * 当哈希表中的容量大于这个值时，表中的桶才能进行树形化
+ * 否则桶内元素太多时会扩容，而不是树形化
+ * 为了避免进行扩容、树形化选择的冲突，这个值不能小于4*TREEIFY_THRESHOLD
+
+ */
+static final int MIN_TREEIFY_CAPACITY = 64;
+//第一次使用是初始化，数组长度总是2的幂次
+
+transient Node&lt;K,V&gt;[] table;
+//集合的长度
+
+transient int size;
+//修改次数  增删改的次数
+transient int modCount;
+
+//长度大于threshold 的时候进行扩充
+int threshold;
+
+//初始化容量
+
+final float loadFactor;
+</code></pre>
+
+<p>```</p>
+
+<p><code>java
+    //构成链表的基本元素
+    static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; { <br>
+    final int hash; <br>
+    final K key; <br>
+    V value; <br>
+    Node&lt;K,V&gt; next;
+    }
+</code></p>
+
+<p><code>java
+    //构成红黑树的基本结构元素
+    static final class TreeNode&lt;K,V&gt; extends LinkedHashMap.Entry&lt;K,V&gt; { <br>
+    TreeNode&lt;K,V&gt; parent; //父亲节点
+    TreeNode&lt;K,V&gt; left; //左儿子节点
+    TreeNode&lt;K,V&gt; right; //右儿子节点 <br>
+    TreeNode&lt;K,V&gt; prev; //前方节点
+    boolean red; //是否是红色
+    }
+</code></p>
+
+<h2>HashMap的数据结构</h2>
+
+<p><img src="https://i.loli.net/2019/05/23/5ce66951362f615630.png" alt="HashMap的数据结构" title=""/></p>
+
+<p>采用数组加链表的方式存储,在jdk1.8中当链表长度达到8的时候会把链表转换成红黑树</p>
+
+<h2>红黑树</h2>
+
+<blockquote>
+    <p>红黑树就是一种平衡的二叉查找树</p>
+</blockquote>
+
+<h3>二叉查找树</h3>
+
+<h4>二叉查找树的特性</h4>
+
+<ol>
+    <li><p>左子树上所有的节点的值均小于或等于他的根节点的值</p></li>
+    <li><p>右子数上所有的节点的值均大于或等于他的根节点的值</p></li>
+    <li><p>左右子树也一定分别为二叉排序树</p></li>
+</ol>
+
+<p>下图就是个典型的二叉树</p>
+
+<p><img src="https://i.loli.net/2019/05/27/5ceb555d75b8326258.jpg" alt="5ceb555d75b8326258" title=""/></p>
+
+<p>二叉树有什么好处呢? 假如我们要查找8</p>
+
+<ol>
+    <li><p>从跟节点9开始 8小于9 根据二叉树的特性 找到5</p></li>
+    <li><p>8大于2 找到 7</p></li>
+    <li><p>8大于7找到 8</p></li>
+</ol>
+
+<p>三步就找到需要查找的节点了 如何是用链表呢 需要从1一直找到8</p>
+
+<p>但是这种二叉树也是有缺点的 看下图</p>
+
+<p><img src="https://i.loli.net/2019/05/27/5ceb56e0e8c9d90083.jpg" alt="5ceb56e0e8c9d90083" title=""/></p>
+
+<p>如果根节点足够大，那是不是“左腿”会变的特别长，也就是说查找的性能大打折扣，几乎就是线性查找了</p>
+
+<p>那有没有好的办法解决这个问题呢？解决这种多次插入新节点而导致的不平衡？这个时候红黑树就登场了。</p>
+
+<p>红黑树就是一种平衡的二叉查找树，说他平衡的意思是他不会变成“瘸子”，左腿特别长或者右腿特别长。除了符合二叉查找树的特性之外，还具体下列的特性：</p>
+
+<ol>
+    <li><p>节点是红色或者黑色</p></li>
+    <li><p>根节点是黑色</p></li>
+    <li><p>每个叶子的节点都是黑色的空节点（NULL）</p></li>
+    <li><p>每个红色节点的两个子节点都是黑色的。</p></li>
+    <li><p>从任意节点到其每个叶子的所有路径都包含相同的黑色节点。</p></li>
+</ol>
+
+<p>下图就是个典型的红黑树</p>
+
+<p><img src="https://i.loli.net/2019/05/27/5ceb577b2c8c632350.jpg" alt="5ceb577b2c8c632350" title=""/></p>
+
+<p>当插入和删除节点，就会对平衡造成破坏，这时候需要对树进行调整，从而重新达到平衡。那什么情况下会破坏红黑树的规则呢？</p>
+
+<p><img src="https://i.loli.net/2019/05/27/5ceb57bc4b2af94839.jpg" alt="5ceb57bc4b2af94839" title=""/></p>
+
+<p>向原来的红黑树插入值为14的新节点，由于父节点15是黑色节点，所以这种情况没有破坏结构，不需要做任何的改变。</p>
+
+<p>向原树插入21呢？，看下图</p>
+
+<p><img src="https://i.loli.net/2019/05/27/5ceb581fc2e8b62212.jpg" alt="5ceb581fc2e8b62212" title=""/></p>
+
+<p>由于父节点22是红色节点，因此这种情况打破了红黑树的规则4，必须作出调整。那么究竟该怎么调整呢？有两种方式【变色】和【旋转】分为【左旋转】和【右旋转】。</p>
+
+<p>这些在HashMap中都有实现</p>
+
+<p>继续回到源码中 先来看下put方法</p>
+
+<h2>put源码分析</h2>
+
+<h3>put</h3>
+
+<p><code>java
+    public V put(K key, V value) { <br>
+    return putVal(hash(key), key, value, false, true); <br>
+    }
+</code></p>
+
+<p>由此可见 put只是方便使用的 具体实现都在putVal中</p>
+
+<p>我们先看下 hash(key) 方法的实现</p>
+
+<h3>hash</h3>
+
+<p><code>java
+    static final int hash(Object key) { <br>
+    int h; <br>
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16); <br>
+    }
+</code></p>
+
+<ol>
+    <li><p>
+        如果key为空，那么hash值置为0。HashMap允许null作为键，虽然这样，因为null的hash值一定是0，而且null==null为真，所以HashMap里面最多只会有一个null键。而且这个null键一定是放在数组的第一个位置上。但是如果存在hash碰撞，该位置上形成链表了，那么null键对应的节点就不确定在链表中的哪个位置了（取决于插入顺序，并且每次扩容其在链表中的位置都可能会改变）。</p>
+    </li>
+    <li><p>如果key是个不为空的对象，那么将key的hashCode值h和h无符号右移16位后的值做异或运算，得到最终的hash值。</p></li>
+</ol>
+
+<p>从代码中目前我们可确定的信息是：hashCode值（h）是计算基础，在h的基础上进行了两次位运算（无符号右移、异或）</p>
+
+<h3>putVal</h3>
+
+<p>```java
+    /**
+    * @param hash key的hash值
+    * @param key 键
+    * @param value 值
+    * @param onlyIfAbsent 设为true表示如果键不存在，才会写入值。
+    * @param evict evict参数用于LinkedHashMap中的尾部操作，这里没有实际意义。
+    * @return 返回value
+    */
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+    boolean evict) {
+    Node
+    <K
+    ,V>[] tab; Node
+    <K
+    ,V> p; int n, i; // 定义元素数组、当前元素变量
+    // 如果当前Map的元素数组为空 或者 数组长度为0，那么需要初始化元素数组
+    // tab = resize() 初始化了元素数组，resize方法同时也可以实现数组扩容，可参见：resize方法解析
+    if ((tab = table) == null || (n = tab.length) == 0) <br>
+    n = (tab = resize()).length; // n 设置为 数组长度
+</p>
+
+<pre><code>    // 根据hash值和数组长度取摸计算出数组下标
+    if ((p = tab[i = (n - 1) &amp; hash]) == null)  // 如果该位置不存在元素，那么创建一个新元素存储到数组的该位置。
+        tab[i] = newNode(hash, key, value, null); // 此处单独解析
+    else { // 如果该位置已经存在元素，说明有以下情况
+        Node&lt;K,V&gt; e; K k; // e 用来指向根据key匹配到的元素
+        // 如果要写入的key的hash值和当前元素的key的hash值相同，并且key也相等
+        if (p.hash == hash &amp;&amp;
+            ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+            e = p; // 用e指向到当前元素
+
+        // 如果要写入的key的hash值和当前元素的key的hash值不同，或者key不相等，说明不是同一个key，要通过其他数据结构来存储新来的数据
+        else if (p instanceof TreeNode)
+            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value); // 参见：putTreeVal方法解析
+        else { // 运行到这里，说明采用链表结构来存储
+            for (int binCount = 0; ; ++binCount) {  // 要逐一对比看要写入的key是否和链表上的某个key相同
+                if ((e = p.next) == null) { // 如果当前元素没有下一个节点
+                    // 根据键值对创建一个新节点，挂到链表的尾部
+                    p.next = newNode(hash, key, value, null);
+                    //  如果链表上元素的个数已经达到了阀值（可以改变存储结构的临界值），
+                    if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        // 将该链表上所有元素改为TreeNode方式存储（是为了增加查询性能，元素越多，链表的查询性能越差） 或者 扩容
+                        treeifyBin(tab, hash); // 参见：treeifyBin方法解析
+                    break;// 跳出循环，因为没有可遍历的元素了
+                }
+                // 如果下一个节点的 hash值和key值都和要写入的hash 和 key相同
+                if (e.hash == hash &amp;&amp;
+                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                    break;    // 跳出循环，因为找到了相同的key对应的元素
+                p = e;
+            }
+        }
+        if (e != null) { // 说明找了和要写入的key对应的元素，根据情况来决定是否覆盖值
+            V oldValue = e.value; // 旧值
+            if (!onlyIfAbsent || oldValue == null)    // 如果旧值为空  后者  指定了需要覆盖旧值，那么更改元素的值为新值
+                e.value = value;
+            afterNodeAccess(e); // 元素被访问之后的后置处理， LinkedHashMap中有具体实现
+            return oldValue; // 返回旧值
+        }
+    }
+
+    // 执行到这里，说明是增加了新的元素，而不是替换了老的元素，所以相关计数需要累加
+
+    ++modCount; // 修改计数器递增
+    // 当前map的元素个数递增
+    if (++size &gt; threshold) // 如果当前map的元素个数大于了扩容阀值，那么需要扩容元素数组了
+        resize(); // 元素数组扩容
+    afterNodeInsertion(evict); // 添加新元素之后的后后置处理， LinkedHashMap中有具体实现
+    return null; // 返回空
+}
+</code></pre>
+
+<p>// resize方法解析
+    if ((tab = table) == null || (n = tab.length) == 0) <br>
+    n = (tab = resize()).length; // n 设置为 数组长度</p>
+
+<pre><code>    // 根据hash值和数组长度取摸计算出数组下标
+    if ((p = tab[i = (n - 1) &amp; hash]) == null)  // 如果该位置不存在元素，那么创建一个新元素存储到数组的该位置。
+        tab[i] = newNode(hash, key, value, null); // 此处单独解析
+    else { // 如果该位置已经存在元素，说明有以下情况
+        Node&lt;K,V&gt; e; K k; // e 用来指向根据key匹配到的元素
+        // 如果要写入的key的hash值和当前元素的key的hash值相同，并且key也相等
+        if (p.hash == hash &amp;&amp;
+            ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+            e = p; // 用e指向到当前元素
+
+        // 如果要写入的key的hash值和当前元素的key的hash值不同，或者key不相等，说明不是同一个key，要通过其他数据结构来存储新来的数据
+        else if (p instanceof TreeNode)
+            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value); // 参见：putTreeVal方法解析
+        else { // 运行到这里，说明采用链表结构来存储
+            for (int binCount = 0; ; ++binCount) {  // 要逐一对比看要写入的key是否和链表上的某个key相同
+                if ((e = p.next) == null) { // 如果当前元素没有下一个节点
+                    // 根据键值对创建一个新节点，挂到链表的尾部
+                    p.next = newNode(hash, key, value, null);
+                    //  如果链表上元素的个数已经达到了阀值（可以改变存储结构的临界值），
+                    if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+
+                        //此时链表已经有至少9个节点了(binCount&gt;=7，说明已经遍历了至少8次，p至少已经至少到了第8个节点，因为新的节点已经挂到p的后面了，所以链表当前至少9个节点了。这里面判断用了&gt;=，个人理解是一种必须的防御式判断，因为由于并发问题是有可能会导致超出8个的情况的)
+                        // 将该链表上所有元素改为TreeNode方式存储（是为了增加查询性能，元素越多，链表的查询性能越差） 或者 扩容。
+                        treeifyBin(tab, hash); // 参见：treeifyBin方法解析
+                    break;// 跳出循环，因为没有可遍历的元素了
+                }
+                // 如果下一个节点的 hash值和key值都和要写入的hash 和 key相同
+                if (e.hash == hash &amp;&amp;
+                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                    break;    // 跳出循环，因为找到了相同的key对应的元素
+                p = e;
+            }
+        }
+        if (e != null) { // 说明找了和要写入的key对应的元素，根据情况来决定是否覆盖值
+            V oldValue = e.value; // 旧值
+            if (!onlyIfAbsent || oldValue == null)    // 如果旧值为空  后者  指定了需要覆盖旧值，那么更改元素的值为新值
+                e.value = value;
+            afterNodeAccess(e); // 元素被访问之后的后置处理， LinkedHashMap中有具体实现
+            return oldValue; // 返回旧值
+        }
+    }
+
+    // 执行到这里，说明是增加了新的元素，而不是替换了老的元素，所以相关计数需要累加
+
+    ++modCount; // 修改计数器递增
+    // 当前map的元素个数递增
+    if (++size &gt; threshold) // 如果当前map的元素个数大于了扩容阀值，那么需要扩容元素数组了
+        resize(); // 元素数组扩容
+    afterNodeInsertion(evict); // 添加新元素之后的后后置处理， LinkedHashMap中有具体实现
+    return null; // 返回空
+}
+</code></pre>
+
+<p>```</p>
+
+<p><img src="https://i.loli.net/2019/05/27/5ceb5d2149d0097464.jpg" alt="5ceb5d2149d0097464" title=""/></p>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

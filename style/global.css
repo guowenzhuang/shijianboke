@@ -1,0 +1,58 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-size: calc(100vw / 57.5);
+
+}
+
+.head {
+    top: 0;
+    left: 0;
+    border: 0;
+    width: 100%;
+    height: 28.3vh;
+}
+
+@media screen and (max-width: 1000px) {
+    .head {
+        height: 15vh;
+    }
+}
+
+.head-div {
+}
+
+.footer {
+    bottom: 0;
+    width: 100%;
+    border: 0;
+    height: 5vh;
+}
+
+.left-background {
+    width: 8vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: none;
+
+}
+
+.left-background-2 {
+    width: 8vw;
+    position: fixed;
+    top: 60vh;
+    left: 0;
+    background: none;
+
+}
+
+
+.right-background {
+    background-size: 10vw;
+    width: 10vw;
+    position: fixed;
+    top: 20vh;
+    right: 0;
+    background: none;
+}

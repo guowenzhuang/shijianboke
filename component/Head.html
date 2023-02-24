@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <style>
+
+
+        body {
+            overflow: hidden;
+
+        }
+
+        #app-head ul {
+            display: flex;
+            justify-content: center;
+            width: 100vw;
+            overflow-x: auto;
+        }
+
+        #app-head ul li {
+            list-style: none;
+            margin-left: 2vw;
+
+        }
+
+        #app-head ul li:first-child {
+            margin-left: 0;
+        }
+
+        #nav > li > a > img {
+            height: 80vh;
+        }
+
+        @media screen and (max-width: 1000px) {
+            #nav > li > a > img {
+                width: 20vw;
+                height: auto;
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div id="app-head">
+    <ul id="nav">
+        <li id="who"><a href="javascript:top.location.href='../index.html'"><img src="../images/who.png" alt=""/></a>
+        </li>
+        <li id="pit"><a href="javascript:top.location.href='../pit.html'"><img src="../images/pit.png" alt=""/></a></li>
+        <li id="gift"><a href="javascript:top.location.href='../gift.html'"><img src="../images/gift.png" alt=""/></a>
+        </li>
+        <li id="about"><a href="javascript:top.location.href='../about.html'"><img src="../images/about.png"
+                                                                                   alt=""/></a></li>
+    </ul>
+    <div class="right-background">
+
+    </div>
+</div>
+</body>
+<script>
+    document.getElementById("who").style.borderBottom = "0px solid #5F9EFF"
+    document.getElementById("pit").style.borderBottom = "0px solid #5F9EFF"
+    document.getElementById("gift").style.borderBottom = "0px solid #5F9EFF"
+    document.getElementById("about").style.borderBottom = "0px solid #5F9EFF"
+    if (top.location.href.includes("index.html")) {
+        document.getElementById("who").style.borderBottom = "2px solid #5F9EFF"
+    } else if (top.location.href.includes("pit.html")) {
+        document.getElementById("pit").style.borderBottom = "2px solid #5F9EFF"
+    } else if (top.location.href.includes("gift.html")) {
+        document.getElementById("gift").style.borderBottom = "2px solid #5F9EFF"
+    } else if (top.location.href.includes("about.html")) {
+        document.getElementById("about").style.borderBottom = "2px solid #5F9EFF"
+    }
+</script>
+</html>

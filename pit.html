@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <mate name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"></mate>
+    <meta name="application-name" content="逍遥时间的网站,水墨风博客">
+    <meta name="author" content="逍遥时间">
+    <meta name="description" content="一款静态水墨风博客,游戏博客,个人的作品展示">
+    <meta name="keywords" content="html,css,js,博客,水墨,水墨风,作品,游戏,静态">
+    <link rel="stylesheet" href="./style/global.css">
+    <link rel="stylesheet" href="./style/pit.css">
+    <style>
+        #iframe-2048 {
+            /*
+            overscroll-behavior: none;
+            */
+        }
+    </style>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?c82718612b38d3ac7044b10df3f9aec0";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</head>
+<body>
+<div id="app">
+    <div>
+        <iframe src="component/Head.html" class="head"></iframe>
+    </div>
+    <div style="text-align: center">
+        我挖了哪些坑
+    </div>
+    <ul class="project">
+        <li class="jushi">
+            <h3>巨石论坛</h3>
+
+            <div>
+                <img src="images/jushi1.png" style="width: 10vw" alt="">
+                <img src="images/jushi2.png" style="width: 10vw" alt="">
+                <img src="images/jushi3.png" style="width: 10vw" alt="">
+            </div>
+
+            <div class="desc">
+                一个微服务+webflux+vue开发的论坛 巨石论坛 <br>
+                后端 java: <a target="_blank" href="https://github.com/guowenzhuang/jushi">github.com</a> <br>
+                前端 H5版 vant: <a target="_blank" href="https://github.com/guowenzhuang/jushi-web-vant">github.com</a>
+            </div>
+        </li>
+
+        <li class="gsbx">
+            <h3>GSBX博客</h3>
+            <div><img src="https://i.loli.net/2019/09/06/8A7dLF2OvfSpZJY.png" alt=""></div>
+            <div class="desc">
+                无服务动态个人博客系统 <br>
+                github.com<br>
+                无须服务器部署,纯静态页面,实现文章管理,个人信息管理等<br>
+                利用github api 实现<br>
+                GSBX博客源码: <a target="_blank" href="https://github.com/guowenzhuang/gsbx">github.com</a>
+            </div>
+        </li>
+
+        <li class="game-2048">
+            <h3>2048小游戏</h3>
+            <div>在线体验  <a href="javascript:location.href='2048/index.html'">手机点我体验</a></div>
+            <!--<div><img src="images/2048.png" alt=""></div>-->
+            <div class="iframe-2048">
+                <iframe src="2048/index.html" alt="" style="width: 100%;height: 100%;border: 0;"></iframe>
+            </div>
+            <div class="desc">
+                所熟知的2048游戏 <br>
+                <a href="https://gitee.com/guowenzhuang/2048" target="_blank">gitee</a>
+            </div>
+        </li>
+
+        <li class="workbench">
+            <h3>工程效率平台</h3>
+            <div style="font-size: 15px;margin-top: 15px;">友情提示: 图比较多 耐心观看</div>
+            <div class="desc">
+                <div>首先是用户登录</div>
+                <div><img src="images/work-login.png" alt=""></div>
+                <div>首页:</div>
+                <div><img src="images/work-home.png" alt=""></div>
+                <div>发布任务:</div>
+                <div><img src="images/work-create-task.png" alt=""></div>
+                <div>任务应用管理部署:</div>
+                <div><img src="images/work-task.png" alt=""></div>
+                <div>
+                    实现了部署的自动化,有别于jenkins的是 发布任务,需要审核,设定上线时间等, 发布任务粒度=需求, 每个需求所牵扯的项目
+                    统一发布, 自动合并代码等.... 避免了多人开发的项目冲突
+                    <br>
+                    前端 react: <a href="https://gitee.com/jsfront/workbench-react" target="_blank">gitee</a> <br>
+                    后端 java : <a href="https://gitee.com/jsfront/workbench-server" target="_blank">gitee</a>
+                </div>
+            </div>
+        </li>
+
+
+        <li class="wxTime">
+            <h3>微信机器人</h3>
+            <div style="font-size: 15px;margin-top: 15px;">友情提示: 图比较多 耐心观看</div>
+            <div class="desc">
+                <div>chatGpt私聊</div>
+                <div><img src="images/wxchat.jpg" alt=""></div>
+                <div>微信小游戏:</div>
+                <div><img src="images/wxgame.jpg" alt=""></div>
+                <div>五子棋:</div>
+                <div><img src="images/wxwuziqi.png" alt=""></div>
+                <div>斗地主:</div>
+                <div><img src="images/wxdoudizhu.jpg" alt=""></div>
+                <div>
+                    微信的两个小游戏和chatGpt对接
+                    <br>
+                    后端 java : <a href="https://gitee.com/guowenzhuang/wx-time" target="_blank">gitee</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="shaniu">
+            <h3>傻妞-桌面宠物-window</h3>
+            <div><img src="images/shaniu1.jpg" alt=""></div>
+            <div><img src="images/shaniu2.png" alt=""></div>
+            <div class="desc">
+                windows的桌面宠物 <br>
+
+                源码 unity: <a href="https://pan.baidu.com/s/10yV5-t82-ASK6jZCcrJsSA?pwd=hypd" target="_blank">百度云
+                提取码: hypd</a>
+            </div>
+        </li>
+
+        <li class="sshoot">
+            <h3>rpg</h3>
+            <div><img src="images/sshoot.jpg" alt=""></div>
+            <div class="desc">
+                人物攻击功能, 宠物系统,背包系统, 怪物系统<br>
+                源码 ue5: <a href="https://pan.baidu.com/s/1Yr-b-yFFVsqeZamZmJRa2Q?pwd=ceav" target="_blank">百度云
+                提取码: ceav </a>
+            </div>
+        </li>
+
+        <li class="time-word">
+            <h3>时间世界</h3>
+            <div><img src="images/timeword.jpg" alt=""></div>
+            <div class="desc">
+                mmorpg 开发中.... 敬请期待<br>
+                --人物基本系统 已完成 <br>
+                --背包系统 已完成 <br>
+                --打造系统 未完成 <br>
+                --做法系统 未完成 <br>
+                --钓鱼系统 未完成 <br>
+
+            </div>
+        </li>
+
+
+    </ul>
+</div>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+<img class="left-background" src="images/zhu.png"></img>
+<img class="left-background-2" src="images/zhu3.png"></img>
+<img class="right-background" src="images/zhu2.png"></img>
+
+<script>
+
+</script>
+</body>
+</html>

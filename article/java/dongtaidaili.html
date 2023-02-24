@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <meta name="description" content="java动态代理">
+    <meta name="keywords" content="java,动态代理">
+</head>
+<body>
+<hr/>
+
+<h1>java动态代理</h1>
+
+<h2>什么是动态代理</h2>
+
+<p>
+    动态代理就是可以任意的控制任意对象的执行过程，意思就是说这个对象的执行过程可以由客户端灵活的指定，可能这样说还是不太明确，通俗说就是</p>
+
+<p>
+    本来应该自己做的事情，因为没有某种原因不能直接做，只能请别人代理做。被请的人就是代理。比如我们需要个妹子,而我们自己找太麻烦了,就可以找个人帮你找妹子。通俗的将就是在调用实现类的方法时，可以在方法执行前后做额外的工作，这个就是代理。</p>
+
+<h2>在java中如何实现动态代理</h2>
+
+<p>先来个找妹的接口</p>
+
+<p>```java
+    public interface DynamicDao {</p>
+
+<pre><code> /**
+ * 找妹子
+
+ */
+void forSister();
+</code></pre>
+
+<p>}
+    ```</p>
+
+<p>再写一个找妹实现类来实现这个接口,这个实现类就是我们要代理的对象</p>
+
+<p>```java
+    public class DynamicDaoImpl implements DynamicDao {</p>
+
+<pre><code>@Override
+public void forSister() {
+    System.out.println("找妹子");
+
+
+    System.out.println("发现萌妹");
+
+    System.out.println("跟妹子要联系方法");
+
+}
+</code></pre>
+
+<p>}
+    ```</p>
+
+<p>再新建个Handler(帮找妹子的人) 这个类必须继承InvocationHandler接口</p>
+
+<p>处理类(即能够做额外工作的类)：</p>
+
+<p>```java
+    public class MediationHandle implements InvocationHandler {
+    /**
+    * 持有被代理对象的引用（此引用可以有外部灵活制定的）
+    */
+    private Object target;</p>
+
+<pre><code>public MediationHandle(Object target) {
+    this.target = target;
+}
+
+@Override
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    System.out.println("去妹子出现率高的场合");
+    method.invoke(target, args);
+    System.out.println("把联系方式给雇主");
+    return null;
+}
+</code></pre>
+
+<p>}
+    ```</p>
+
+<p>找妹子的人有了 如何让他去帮咱们找妹子呢? 实现如下</p>
+
+<p>```java
+    public class DynamicProxyTest {</p>
+
+<pre><code>@Test
+public void testProxy() {
+     // 需要代理的对象
+    DynamicDao dynamicDao=new DynamicDaoImpl();
+    //创建一个帮找妹子的人 指定找妹子的实现
+    MediationHandle handle = new MediationHandle(dynamicDao);
+    // 创建代理 handle+proxy才能实现动态代理(反射的方式)
+    DynamicDao dynamicDaoProxy= (DynamicDao) Proxy.newProxyInstance(
+            dynamicDao.getClass().getClassLoader(),
+            dynamicDao.getClass().getInterfaces(),
+            handle
+    );
+    //开始找妹子
+    dynamicDaoProxy.forSister();
+
+}
+</code></pre>
+
+<p>}</p>
+
+<p>```</p>
+
+<p>打印的值</p>
+
+<p><code>java
+    去妹子出现率高的场合
+    找妹子
+    发现萌妹
+    跟妹子要联系方法
+    把联系方式给雇主
+</code></p>
+
+<p>好了,这就实现了动态代理,spring中的Aop默认也是基于这种方式 需要配置拦截的方法</p>
+
+<p>spring Aop 还提供了另一种方式来实现动态代理 Cglib 下篇再讲</p>
+
+<p><img src="https://i.loli.net/2019/06/15/5d04e1799ddbe78314.jpg" alt="5d04e1799ddbe78314" title=""/></p>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

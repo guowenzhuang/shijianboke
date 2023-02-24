@@ -1,0 +1,56 @@
+.project {
+    margin: auto;
+    padding: 0 20%;
+    list-style: none;
+}
+
+.project > li {
+    background: rgb(243, 242, 246);
+    padding: 2vh 0;
+    border: rgba(243, 200, 1, 0.35) 2px solid;
+}
+
+.project > li {
+    margin-top: 3vh;
+}
+
+.project > li:first-child {
+    margin-top: 5vh;
+}
+
+.project > li > h3 {
+    text-align: center;
+}
+
+.project > li > .desc   {
+    margin-top: 5vh;
+    font-size: calc(100vw / 90.5);
+    text-align: center;
+
+}
+
+.project > li > .desc *  {
+    font-size: calc(100vw / 90.5);
+    text-align: center;
+
+}
+
+.project > li > div {
+    text-align: center;
+}
+
+.project > li img {
+    width: 30vw;
+}
+
+.iframe-2048{
+    width: 50vw;
+    height: 80vh;
+    margin: auto;
+}
+
+@media screen and (max-width: 1000px) {
+    .iframe-2048{
+        height: 40vh;
+    }
+}

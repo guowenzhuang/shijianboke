@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <meta name="description" content="Flutter入门">
+    <meta name="keywords" content="Flutter,js,多端">
+</head>
+<body>
+<hr/>
+
+<h1>Flutter入门</h1>
+
+<h2>Flutter安装(Windows)</h2>
+
+<ol>
+    <li><p>下载Flutter解压包</p>
+
+        <p><a href="https://flutter.dev/docs/development/tools/sdk/releases#windows">点我下载</a>
+            然后解压到目录中 作者的目录是 D:\flutter</p></li>
+    <li><p>配置环境变量</p>
+
+        <pre><code> PUB_HOSTED_URL=https://pub.flutter-io.cn
+ FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+ PATH 新增 D:\\flutter\bin   # 换成你的解压目录 记得用;号分开
+</code></pre>
+    </li>
+    <li><p>安装依赖项
+        打开cmd/powershell 输入 </p>
+
+        <pre><code>flutter doctor
+</code></pre>
+
+        <p>稍等片刻 会出现如下显示
+            <img src="/boke/images/flutter/flutter_doctor.png" alt="flutterdockor图" title=""/></p>
+
+        <pre><code>继续输入命令:
+
+flutter doctor --android-licenses  # 出现提示 一直输入y
+</code></pre>
+    </li>
+    <li><p>IDEA/Android Studio 安装插件</p>
+
+        <ul>
+            <li>Flutter插件： 支持Flutter开发工作流 (运行、调试、热重载等).</li>
+            <li>Dart插件： 提供代码分析 (输入代码时进行验证、代码补全等).</li>
+        </ul>
+    </li>
+    <li><p>手机连接电脑
+        手机连接上电脑 打开开发者模式 开启USB调试 &amp; 允许USB安装应用</p>
+
+        <h2>运行第一个Flutter项目(IDEA)</h2></li>
+    <li><p>新创建个Flutter项目 选择好刚开始解压的flutter目录
+        <img src="/boke/images/flutter/createflutter1.png" alt="fluttercreate1" title=""/>
+        项目名称:hello_flutter
+        <img src="/boke/images/flutter/createflutter2.png" alt="fluttercreate2" title=""/>
+        新建完成
+        <img src="/boke/images/flutter/createflutter3.png" alt="fluttercreate3" title=""/></p></li>
+    <li><p>修改gradle配置(gradle国内访问不了)
+        D:\flutter\packages\flutter_tools\gradle\flutter.gradle
+        把google() 和 jcenter() 注释掉。下面添加</p>
+
+        <pre><code>maven { url 'https://maven.aliyun.com/repository/google' }
+maven { url 'https://maven.aliyun.com/repository/jcenter' }
+maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+</code></pre>
+
+        <p>再打开当前项目文件夹/android/build.gradle文件
+            把google() 和 jcenter() 注释掉。(此文件下有两处都需要替换 buildscript下和allprojects下)下面添加</p>
+
+        <pre><code>       maven { url 'https://maven.aliyun.com/repository/google' }
+       maven { url 'https://maven.aliyun.com/repository/jcenter' }
+       maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+</code></pre>
+
+        <p><img src="/boke/images/flutter/createflutter6.png" alt="fluttercreate6" title=""/></p></li>
+    <li><p>修改gradle下载地址
+        <a href="http://services.gradle.org/distributions/">下载gradle-4.10.2-all.zip</a>
+        找到项目中的android->gradle->wrapper->:
+        把解压包放到此目录下 不要解压
+        修改同级目录下的文件:gradle-wrapper.properties
+        把distributionUrl修改为:</p>
+
+        <pre><code>distributionUrl=gradle-4.10.2-all.zip
+</code></pre>
+    </li>
+    <li><p>修改启动参数 (白屏问题)
+        <img src="/boke/images/flutter/createflutter5.png" alt="fluttercreate5" title=""/></p></li>
+    <li><p>启动项目
+        点击右上角 启动按钮 出现如图
+        <img src="/boke/images/flutter/createflutter7.png" alt="fluttercreate7" title=""/>
+        此时手机上会弹出是否安装应用
+        安装应用后打开即可 效果图如下
+        <img src="/boke/images/flutter/createflutter8.jpg" alt="fluttercreate8" title=""/></p>
+
+        <p>完成</p></li>
+</ol>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

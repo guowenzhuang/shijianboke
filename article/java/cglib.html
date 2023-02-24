@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逍遥时间的网站</title>
+    <meta name="description" content="CGLIB动态代理">
+    <meta name="keywords" content="cglib,动态代理,java">
+</head>
+<body>
+<hr/>
+
+<h1>CGLIB动态代理</h1>
+
+<h2>cglib是什么?</h2>
+
+<p>CGLIB(Code Generation Library)是一个开源项目！</p>
+
+<p>是一个强大的，高性能，高质量的Code生成类库，它可以在运行期扩展Java类与实现Java接口。</p>
+
+<p>CGLIB是一个强大的高性能的<a href="https://baike.baidu.com/item/%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90">代码生成</a>包。它广泛的被许多AOP的框架使用，例如Spring
+    AOP和dynaop，为他们提供方法的interception（拦截）。最流行的OR
+    Mapping工具hibernate也使用CGLIB来代理单端single-ended(多对一和一对一)关联（对集合的延迟抓取，是采用其他机制实现的）。EasyMock和<a
+            href="https://baike.baidu.com/item/jMock">jMock</a>是通过使用模仿（mock）对象来测试java代码的包。它们都通过使用CGLIB来为那些没有接口的类创建模仿（mock）对象。
+</p>
+
+<h2>CGLIIB实现动态代理</h2>
+
+<p>先来个service 注意没有接口</p>
+
+<p>```java
+    public class CglibService {
+    public CglibService() {
+    System.out.println("CglibDao 构造方法");
+    }</p>
+
+<pre><code>/**
+ * 该方法不能被子类覆盖,Cglib是无法代理final修饰的方法的
+ * @param name
+ * @return
+ */
+final public String sayOthers(String name){
+    System.out.println("CglibDao final sayOthers:"+name);
+    return null;
+}
+
+public void sayHello(){
+    System.out.println("CglibDao:sayHello");
+}
+</code></pre>
+
+<p>}
+    ```</p>
+
+<p>新建一个Interceptor实现org.springframework.cglib.proxy.MethodInterceptor</p>
+
+<p>```java
+    public class MyMethodInterceptor implements MethodInterceptor {
+    /**
+    *
+    * @param o 代理对象
+    * @param method 被代理的对象方法
+    * @param objects 方法入参
+    * @param methodProxy 代理方法
+    * @return
+    * @throws Throwable
+    */
+    @Override
+    public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+    System.out.println("======插入前置通知======");
+    Object object = methodProxy.invokeSuper(o, objects);
+    System.out.println("======插入后置通知======");
+    return object;
+    }
+    }</p>
+
+<p>```</p>
+
+<p>新建测试类</p>
+
+<p>```java
+    /**
+    * cglib 动态代理测试
+    */
+    public class cglibAgentTest {</p>
+
+<pre><code>@Test
+public void testCglibAgent(){
+    Enhancer enhancer = new Enhancer();
+    enhancer.setSuperclass(CglibService.class);
+    // 设置enhancer的回调对象
+    enhancer.setCallback(new MyMethodInterceptor());
+    // 创建代理对象
+    CglibService proxy= (CglibService)enhancer.create();
+    // 通过代理对象调用目标方法
+    proxy.sayHello();
+    proxy.sayOthers("小明");
+}
+</code></pre>
+
+<p>}
+    ```</p>
+
+<p>打印的值</p>
+
+<p><code>java
+    CglibDao 构造方法
+    ======插入前置通知======
+    CglibDao:sayHello
+    ======插入后置通知======
+    CglibDao final sayOthers:小明
+</code></p>
+
+<p>可以看出来 会先执行他的构造方法 当调用sayHello时候会先调用他们的代理方法 如果当方法为final修饰时 无法实现代理</p>
+
+<h2>总结</h2>
+
+<p>Cglib与InvocationHandler实现的动态代理不同是 cglib不用写接口</p>
+
+<p>Spring中的aop也可以通过配置采用Cglib方式</p>
+
+<p>除了CGLIB包，脚本语言例如Groovy和BeanShell，也是使用ASM来生成java的字节码。当然不鼓励直接使用ASM，</p>
+
+<p>因为它要求你必须对JVM内部结构包括class文件的格式和指令集都很熟悉，所以推荐用Cglib</p>
+
+<p><img src="https://i.loli.net/2019/06/15/5d0501353921378647.jpg" alt="5d0501353921378647" title=""/></p>
+<div>
+    <iframe src="component/Footer.html" class="footer"></iframe>
+</div>
+</body>
+</html>

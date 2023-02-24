@@ -1,0 +1,111 @@
+.who {
+    background: url("../images/who-backage2.png") no-repeat;
+    background-size: 100% 100%;
+    position: relative;
+    margin: auto;
+}
+
+.understanding {
+    background: url("../images/understanding.png") no-repeat;
+    background-size: 100% 100%;
+    position: relative;
+}
+
+.who > div {
+    background: none;
+    position: relative;
+    top: 13vh;
+}
+
+.who > div:last-child {
+    margin-top: 15vh;
+}
+
+.html-audio {
+    background: url("../images/music.png") no-repeat;
+    position: relative;
+    background-size: 100% 100%;
+    width: 80vw;
+    margin: auto;
+
+}
+
+.html-audio > .title {
+    position: relative;
+    top: 13vh;
+
+}
+
+.html-audio > .play-audio {
+    position: relative;
+    top: 25vh;
+    left: 4vw;
+    color: rgba(0, 0, 0, 1);
+    background: rgba(248, 248, 248, 1);
+    padding: 5px;
+    border-radius: 10%;
+}
+
+.html-audio > .play-audio:hover {
+    background: rgba(225, 225, 222, 0.8);
+    color: rgba(0, 0, 0, 0.8);
+
+}
+
+.html-audio > .play-audio:active {
+    background: rgba(94, 93, 93, 0.5);
+}
+
+.who-font {
+    width: 20vw;
+    margin: auto;
+}
+
+
+@media screen and (max-width: 1000px) {
+    .who-font {
+        width: auto;
+    }
+
+    .who > div:last-child {
+        margin-top: 1vh;
+        font-size: 5vw;
+    }
+
+    .who > div:nth-last-child(2) {
+        margin-top: 1vh;
+        font-size: 5vw;
+    }
+
+    .html-audio > .play-audio {
+        top: 10vh;
+        font-size: 5vw;
+        width: 7vw;
+
+    }
+
+    .understanding > div {
+        font-size: 5vw;
+    }
+
+    #game-over {
+        font-size: 5vw;
+
+    }
+
+    #game-start {
+        font-size: 5vw;
+    }
+
+
+}
+
+#html-what {
+    height: auto;
+}
+
+.understanding > div {
+    position: relative;
+    top: 15vh;
+}
+
